@@ -11,57 +11,101 @@
 
 // note : some template capability would be welcomed here
 
+// clang-format off
 static void ZS_deltaDecode8_scalar(
         uint8_t* dst,
         uint8_t first,
         uint8_t const* deltas,
         size_t nbElts)
+        contract_pre(nbElts >= 1)
+        contract_pre(nbElts <= SIZE_MAX / sizeof(*dst))
+        contract_writes_n(dst, nbElts)
+        contract_pre(contract_readable(deltas, (nbElts - 1) * sizeof(*deltas)))
+        contract_pre(contract_disjoint(dst, deltas))
 {
     assert(nbElts > 0);
     dst[0] = first;
-    for (size_t n = 1; n < nbElts; ++n) {
+    for (size_t n = 1; n < nbElts; ++n)
+        contract_assigns(n; contract_range(dst, 0, nbElts))
+        contract_invariant(n >= 1 && n <= nbElts)
+        contract_decreases(nbElts - n)
+    {
         dst[n] = (uint8_t)(dst[n - 1] + deltas[n - 1]);
     }
 }
+// clang-format on
 
+// clang-format off
 static void ZS_deltaDecode16_scalar(
         uint16_t* dst,
         uint16_t first,
         uint16_t const* deltas,
         size_t nbElts)
+        contract_pre(nbElts >= 1)
+        contract_pre(nbElts <= SIZE_MAX / sizeof(*dst))
+        contract_writes_n(dst, nbElts)
+        contract_pre(contract_readable(deltas, (nbElts - 1) * sizeof(*deltas)))
+        contract_pre(contract_disjoint(dst, deltas))
 {
     assert(nbElts > 0);
     dst[0] = first;
-    for (size_t n = 1; n < nbElts; ++n) {
+    for (size_t n = 1; n < nbElts; ++n)
+        contract_assigns(n; contract_range(dst, 0, nbElts))
+        contract_invariant(n >= 1 && n <= nbElts)
+        contract_decreases(nbElts - n)
+    {
         dst[n] = (uint16_t)(dst[n - 1] + deltas[n - 1]);
     }
 }
+// clang-format on
 
+// clang-format off
 static void ZS_deltaDecode32_scalar(
         uint32_t* dst,
         uint32_t first,
         uint32_t const* deltas,
         size_t nbElts)
+        contract_pre(nbElts >= 1)
+        contract_pre(nbElts <= SIZE_MAX / sizeof(*dst))
+        contract_writes_n(dst, nbElts)
+        contract_pre(contract_readable(deltas, (nbElts - 1) * sizeof(*deltas)))
+        contract_pre(contract_disjoint(dst, deltas))
 {
     assert(nbElts > 0);
     dst[0] = first;
-    for (size_t n = 1; n < nbElts; ++n) {
+    for (size_t n = 1; n < nbElts; ++n)
+        contract_assigns(n; contract_range(dst, 0, nbElts))
+        contract_invariant(n >= 1 && n <= nbElts)
+        contract_decreases(nbElts - n)
+    {
         dst[n] = dst[n - 1] + deltas[n - 1];
     }
 }
+// clang-format on
 
+// clang-format off
 static void ZS_deltaDecode64_scalar(
         uint64_t* dst,
         uint64_t first,
         uint64_t const* deltas,
         size_t nbElts)
+        contract_pre(nbElts >= 1)
+        contract_pre(nbElts <= SIZE_MAX / sizeof(*dst))
+        contract_writes_n(dst, nbElts)
+        contract_pre(contract_readable(deltas, (nbElts - 1) * sizeof(*deltas)))
+        contract_pre(contract_disjoint(dst, deltas))
 {
     assert(nbElts > 0);
     dst[0] = first;
-    for (size_t n = 1; n < nbElts; ++n) {
+    for (size_t n = 1; n < nbElts; ++n)
+        contract_assigns(n; contract_range(dst, 0, nbElts))
+        contract_invariant(n >= 1 && n <= nbElts)
+        contract_decreases(nbElts - n)
+    {
         dst[n] = dst[n - 1] + deltas[n - 1];
     }
 }
+// clang-format on
 
 #if ZL_HAS_SSSE3
 

@@ -15,6 +15,23 @@ AllowShortLoopsOnASingleLine: false
 AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: true
 AlwaysBreakTemplateDeclarations: true
+# c_contracts clauses trail a declarator like an attribute; without this
+# clang-format treats each as a call and cascades the continuation indent.
+AttributeMacros:
+  - contract_pre
+  - contract_post
+  - contract_returns
+  - contract_assigns
+  - contract_frees
+  - contract_writes_nothing
+  - contract_reads
+  - contract_writes
+  - contract_reads_n
+  - contract_writes_n
+  - contract_ghost
+StatementAttributeLikeMacros:
+  - contract_invariant
+  - contract_decreases
 BinPackArguments: false
 BinPackParameters: false
 BraceWrapping:
