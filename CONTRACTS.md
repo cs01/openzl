@@ -36,7 +36,7 @@ vendored from [c-contracts](https://github.com/cs01/c-contracts).
 | What | How |
 |---|---|
 | Set flags | `CF="-DNDEBUG -I include -I src"` |
-| `-DNDEBUG` | Matches the release build. Drives `ZL_DBG_LVL` to 2, which makes `ZL_ENABLE_ASSERT` 0, which expands every `ZL_ASSERT(P)` to a statically dead `(0 && (P))` expression: `P` is never evaluated and nothing aborts. Asserts in the body are **not** checked by any proof here — and do nothing in production either. See the first finding below |
+| `-DNDEBUG` | Matches the release build. Drives `ZL_DBG_LVL` to 2, which makes `ZL_ENABLE_ASSERT` 0, which expands every `ZL_ASSERT(P)` to a statically dead `(0 && (P))` expression: `P` is never evaluated and nothing aborts. Asserts in the body are **not** checked by any proof here — and do nothing in production either. See Observations |
 | Run all proofs | `./proofs/run.sh` |
 | Run one proof | See the Command column in the tables below |
 | SIMD | `goto-instrument` warns `no body for function __builtin_ia32_*` and carries on. A proof that actually enters a SIMD path would need those modelled; annotate the scalar leaf and reach the dispatcher with `-r` instead |
@@ -54,16 +54,22 @@ vendored from [c-contracts](https://github.com/cs01/c-contracts).
 
 ## Undefined behavior discovered
 
-**None so far.** Four kernels are proven clean; no counterexample in this
-codebase has turned out to be a defect in OpenZL. For contrast, the same
-method on zstd found three UB sites in four proofs. What it has found here is
-one unstated precondition and one structural weakness, neither of which is a
-bug you can trigger today.
+**None.** No counterexample in this codebase has turned out to be a defect in
+OpenZL. Four kernels are proven clean and nothing else has been proven yet, so
+the honest reading is "nothing found in a small sample", not "the codecs are
+clean". For contrast, the same method on zstd found three UB sites in four
+proofs.
 
-| Where | Code | What it is | Exhibited by |
+The two entries below are **not** UB and **not** bugs you can trigger. They
+are observations about how the kernels are specified. They are recorded
+because they shape where to look next, not because anything is broken.
+
+## Observations
+
+| Where | What | Why it is not a bug | Basis |
 |---|---|---|---|
-| all decode kernels | `ZL_ASSERT(...)` | **Structural, not UB.** ~300 assertions across the 31 decode kernels are the only guard on their parameters, and under `NDEBUG` each expands to `(0 && (P))` — the predicate is never evaluated and nothing aborts. In release the kernels trust their callers completely; the bindings are the sole validation layer. Every one of those asserts is a `contract_pre` waiting to be written, and promoting them moves the check from "does nothing in production" to "proven at the call site" | `grep -cE '^\s*(ZL_ASSERT\|assert)' src/openzl/codecs/*/decode_*kernel*.c` |
-| `decode_zigzag_kernel.h` | `ZL_zigzagDecode64(dst, src, nbElts)` | **Unstated precondition, not UB.** The proof does not hold without `contract_pre (nbElts <= SIZE_MAX / 8)`: nothing in the signature stops `nbElts * 8` from wrapping, and `r_ok(src, <wrapped>)` then permits `src + i` to leave the object. Not reachable from any real caller — no object is that large — but the header said this only in prose ("sized accordingly"), and the clause is that sentence made checkable | remove the clause and re-run the `ZL_zigzagDecode64` command below: `arithmetic overflow on signed *` at `src[i]`, FAIL 2s |
+| all decode kernels | `ZL_ASSERT` is inert in release. Under `NDEBUG` each expands to `(0 && (P))` — `P` is never evaluated and nothing aborts. ~300 of these across the 31 decode kernels are the only guard on their parameters, so in a release build the kernels trust their callers completely and the bindings are the sole validation layer | Working as designed; `ZL_ASSERT` is documented as debug-only. It matters because it says the attack surface is the binding layer, and because each assert is a `contract_pre` waiting to be written — which moves the check from "does nothing in production" to "proven at the call site" | `gcc -E -P -DNDEBUG` on a `ZL_ASSERT`; `grep -cE '^\s*(ZL_ASSERT\|assert)' src/openzl/codecs/*/decode_*kernel*.c` |
+| `decode_zigzag_kernel.h` | `ZL_zigzagDecode64` does not verify without `contract_pre (nbElts <= SIZE_MAX / 8)`: nothing in the signature stops `nbElts * 8` from wrapping, and `r_ok(src, <wrapped>)` then permits `src + i` to leave the object | Not reachable from any real caller — no object is that large. The header already required it in prose ("sized accordingly"); the clause is that sentence made checkable, and stock clang now warns at any call site it can fold | remove the clause and re-run the `ZL_zigzagDecode64` command below: `arithmetic overflow on signed *` at `src[i]`, FAIL 2s |
 
 ## Proven correct
 
