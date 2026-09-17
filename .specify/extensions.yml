@@ -1,0 +1,321 @@
+installed: []
+settings:
+  auto_execute_hooks: true
+hooks:
+  after_plan:
+  - extension: review
+    command: speckit.review-plan
+    enabled: true
+    optional: false
+    prompt: Execute speckit.review-plan?
+    description: Post-plan constitution compliance, correctness, coverage, and risk review (Plan Review)
+    condition: null
+  - extension: pipeline-state
+    command: speckit.pipeline-state.write
+    enabled: true
+    optional: false
+    prompt: Execute speckit.pipeline-state.write?
+    description: Record plan completion
+    condition: null
+  - extension: pipeline
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    prompt: Execute speckit.pipeline.display?
+    description: Show pipeline state after plan
+    condition: null
+  - extension: sdd
+    command: speckit.sdd.commit
+    enabled: true
+    optional: true
+    prompt: Execute speckit.sdd.commit?
+    description: Commit implementation plan
+    condition: null
+  after_specify:
+  - extension: pipeline-state
+    command: speckit.pipeline-state.write
+    enabled: true
+    optional: false
+    prompt: Execute speckit.pipeline-state.write?
+    description: Record specify completion
+    condition: null
+  - extension: pipeline
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    prompt: Execute speckit.pipeline.display?
+    description: Show pipeline state after specify
+    condition: null
+  - extension: sdd
+    command: speckit.sdd.commit
+    enabled: true
+    optional: true
+    prompt: Execute speckit.sdd.commit?
+    description: Commit new specification
+    condition: null
+  after_clarify:
+  - extension: pipeline-state
+    command: speckit.pipeline-state.write
+    enabled: true
+    optional: false
+    prompt: Execute speckit.pipeline-state.write?
+    description: Record clarify completion
+    condition: null
+  - extension: pipeline
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    prompt: Execute speckit.pipeline.display?
+    description: Show pipeline state after clarify
+    condition: null
+  - extension: sdd
+    command: speckit.sdd.commit
+    enabled: true
+    optional: true
+    prompt: Execute speckit.sdd.commit?
+    description: Commit spec clarifications
+    condition: null
+  after_review:
+  - extension: pipeline-state
+    command: speckit.pipeline-state.write
+    enabled: true
+    optional: false
+    prompt: Execute speckit.pipeline-state.write?
+    description: Record review completion
+    condition: null
+  - extension: pipeline
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    prompt: Execute speckit.pipeline.display?
+    description: Show pipeline state after review gate
+    condition: null
+  - extension: sdd
+    command: speckit.sdd.commit
+    enabled: true
+    optional: true
+    prompt: Execute speckit.sdd.commit?
+    description: Commit review artifacts
+    condition: null
+  after_tasks:
+  - extension: pipeline-state
+    command: speckit.pipeline-state.write
+    enabled: true
+    optional: false
+    prompt: Execute speckit.pipeline-state.write?
+    description: Record tasks completion
+    condition: null
+  - extension: pipeline
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    prompt: Execute speckit.pipeline.display?
+    description: Show pipeline state after tasks
+    condition: null
+  - extension: sdd
+    command: speckit.sdd.commit
+    enabled: true
+    optional: true
+    prompt: Execute speckit.sdd.commit?
+    description: Commit task breakdown
+    condition: null
+  after_analyze:
+  - extension: pipeline-state
+    command: speckit.pipeline-state.write
+    enabled: false
+    optional: false
+    prompt: Execute speckit.pipeline-state.write?
+    description: Record analyze completion
+    condition: null
+  - extension: pipeline
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    prompt: Execute speckit.pipeline.display?
+    description: Show pipeline state after analyze
+    condition: null
+  after_implement:
+  - extension: pipeline-state
+    command: speckit.pipeline-state.write
+    enabled: true
+    optional: false
+    prompt: Execute speckit.pipeline-state.write?
+    description: Record implement completion
+    condition: null
+  - extension: pipeline
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    prompt: Execute speckit.pipeline.display?
+    description: Show pipeline state after implement
+    condition: null
+  after_verify:
+  - extension: pipeline-state
+    command: speckit.pipeline-state.write
+    enabled: true
+    optional: false
+    prompt: Execute speckit.pipeline-state.write?
+    description: Record verify completion
+    condition: null
+  - extension: pipeline
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    prompt: Execute speckit.pipeline.display?
+    description: Show pipeline state after verify
+    condition: null
+  - extension: sdd
+    command: speckit.sdd.commit
+    enabled: true
+    optional: true
+    prompt: Execute speckit.sdd.commit?
+    description: Commit verification report
+    condition: null
+  after_scan:
+  - extension: pipeline-state
+    command: speckit.pipeline-state.write
+    enabled: true
+    optional: false
+    prompt: Execute speckit.pipeline-state.write?
+    description: Record scan completion
+    condition: null
+  - extension: pipeline
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    prompt: Execute speckit.pipeline.display?
+    description: Show pipeline state after scan (brownfield)
+    condition: null
+  - extension: sdd
+    command: speckit.sdd.commit
+    enabled: true
+    optional: true
+    prompt: Execute speckit.sdd.commit?
+    description: Commit project profile
+    condition: null
+  after_generate:
+  - extension: pipeline-state
+    command: speckit.pipeline-state.write
+    enabled: true
+    optional: false
+    prompt: Execute speckit.pipeline-state.write?
+    description: Record generate completion
+    condition: null
+  - extension: pipeline
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    prompt: Execute speckit.pipeline.display?
+    description: Show pipeline state after generate (brownfield)
+    condition: null
+  - extension: sdd
+    command: speckit.sdd.commit
+    enabled: true
+    optional: true
+    prompt: Execute speckit.sdd.commit?
+    description: Commit generated specification
+    condition: null
+  before_specify:
+  - extension: pipeline
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    prompt: Execute speckit.pipeline.display?
+    description: Show pipeline state entering specify
+    condition: null
+  before_clarify:
+  - extension: pipeline
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    prompt: Execute speckit.pipeline.display?
+    description: Show pipeline state entering clarify
+    condition: null
+  before_review:
+  - extension: pipeline
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    prompt: Execute speckit.pipeline.display?
+    description: Show pipeline state entering review gate
+    condition: null
+  before_plan:
+  - extension: pipeline
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    prompt: Execute speckit.pipeline.display?
+    description: Show pipeline state entering plan
+    condition: null
+  before_tasks:
+  - extension: pipeline
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    prompt: Execute speckit.pipeline.display?
+    description: Show pipeline state entering tasks
+    condition: null
+  before_analyze:
+  - extension: pipeline
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    prompt: Execute speckit.pipeline.display?
+    description: Show pipeline state entering analyze
+    condition: null
+  before_implement:
+  - extension: pipeline
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    prompt: Execute speckit.pipeline.display?
+    description: Show pipeline state entering implement
+    condition: null
+  before_verify:
+  - extension: pipeline
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    prompt: Execute speckit.pipeline.display?
+    description: Show pipeline state entering verify
+    condition: null
+  before_scan:
+  - extension: pipeline
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    prompt: Execute speckit.pipeline.display?
+    description: Show pipeline state entering scan (brownfield)
+    condition: null
+  before_generate:
+  - extension: pipeline
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    prompt: Execute speckit.pipeline.display?
+    description: Show pipeline state entering generate (brownfield)
+    condition: null
+  after_constitution:
+  - extension: sdd
+    command: speckit.sdd.commit
+    enabled: true
+    optional: true
+    prompt: Execute speckit.sdd.commit?
+    description: Commit constitution update
+    condition: null
+  after_checklist:
+  - extension: sdd
+    command: speckit.sdd.commit
+    enabled: true
+    optional: true
+    prompt: Execute speckit.sdd.commit?
+    description: Commit checklist
+    condition: null
+  after_setup:
+  - extension: sdd
+    command: speckit.sdd.commit
+    enabled: true
+    optional: false
+    prompt: Execute speckit.sdd.commit?
+    description: Commit setup artifacts
+    condition: null

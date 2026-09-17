@@ -1,0 +1,122 @@
+schema_version: "1.0"
+workflow:
+  id: "sdd-full-cycle"
+  name: "Meta SDD Full Cycle with Verification"
+  version: "1.0.0"
+  author: "rl_devai"
+  description: "Complete SDD lifecycle with multi-agent verification — extends the bundled speckit workflow by adding the SDD lifecycle's verify phase (/speckit-verify) and Sapling commit after implementation"
+  integration: claude
+  model: "claude-sonnet-4-20250514"
+  tags:
+    - "meta"
+    - "sdd"
+    - "greenfield"
+    - "verify"
+    - "sapling"
+
+## Workflow Integration
+#
+# Non-Interactive Mode (`--auto` flag):
+# When running workflow steps non-interactively, each step's `args` field must
+# explicitly include the `--auto` flag. The workflow engine does NOT automatically
+# inject `--auto` based on workflow context.
+#
+# Pattern:
+#   args: "--auto {{ inputs.feature_description }}"
+#
+# Workflow Reliability Note:
+# The bare-prompt quality gate in specify/generate steps is non-deterministic.
+# For guaranteed non-blocking execution in automated workflows, combine `--auto`
+# with `--disable-auto-warning` (suppress quality warning but allow exploration).
+#
+# Example:
+#   args: "--auto --disable-auto-warning {{ inputs.feature_description }}"
+#
+# This workflow currently uses bare `args` without `--auto` to preserve interactive
+# review gates. To convert to fully automated mode, add `--auto --disable-auto-warning`
+# to the `args` field of specify, plan, tasks, and implement steps.
+
+requires:
+  speckit_version: ">=0.8.0"
+  integrations:
+    any: ["claude"]
+
+inputs:
+  feature_description:
+    type: string
+    required: true
+    prompt: "Describe what you want to build"
+
+steps:
+  - id: specify
+    type: command
+    command: speckit.specify
+    model: "claude-opus-4-20250514"
+    input:
+      args: "{{ inputs.feature_description }}"
+
+  - id: review-spec
+    type: gate
+    message: "Review the generated spec before planning."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: adversarial-review-primary
+    type: command
+    command: speckit.review
+    model: "claude-opus-4-20250514"
+
+  - id: review-primary-gate
+    type: gate
+    message: "Review adversarial findings. Address MUST-ADDRESS items, skip, or abort."
+    options: [approve, reject, refine]
+    on_reject: retry
+
+  - id: plan
+    type: command
+    command: speckit.plan
+    input:
+      args: "{{ inputs.feature_description }}"
+
+  - id: review-plan
+    type: gate
+    message: "Review the plan before generating tasks."
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: adversarial-review-secondary
+    type: command
+    command: speckit.review
+    model: "claude-opus-4-20250514"
+
+  - id: review-secondary-gate
+    type: gate
+    message: "Review post-plan adversarial findings."
+    options: [approve, reject, refine]
+    on_reject: retry
+
+  - id: tasks
+    type: command
+    command: speckit.tasks
+    input:
+      args: "{{ inputs.feature_description }}"
+
+  - id: implement
+    type: command
+    command: speckit.implement
+    input:
+      args: "{{ inputs.feature_description }}"
+
+  - id: verify
+    type: command
+    command: speckit.verify
+
+  - id: accept-verification
+    type: gate
+    message: "Review verification results. Accept, reject, or refine?"
+    options: [accept, reject, refine]
+    on_reject: retry
+
+  - id: commit
+    type: command
+    command: speckit.sdd.commit

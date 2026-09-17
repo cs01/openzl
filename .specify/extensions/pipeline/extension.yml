@@ -1,0 +1,129 @@
+schema_version: "1.0"
+
+extension:
+  id: pipeline
+  name: "Pipeline Progress Display"
+  version: "0.1.0"
+  description: "Display pipeline progress diagrams at command boundaries"
+  author: rl_devai
+  license: proprietary
+
+requires:
+  speckit_version: ">=0.8.0"
+
+provides:
+  commands:
+    - name: speckit.pipeline.display
+      file: commands/speckit.pipeline.display.md
+      description: "Display ASCII pipeline progress diagram"
+
+hooks:
+  # These enabled: false values are likewise discarded by the manifest merge
+  # (HookExecutor.register_hooks() hardcodes enabled: True); wrapper.py's
+  # _disable_pipeline_display_hooks() is what actually disables them at
+  # install time. See docs/architecture/extension-mechanism-gaps.md GAP-11.
+  before_specify:
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    description: "Show pipeline state entering specify"
+  after_specify:
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    description: "Show pipeline state after specify"
+  before_clarify:
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    description: "Show pipeline state entering clarify"
+  after_clarify:
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    description: "Show pipeline state after clarify"
+  before_review:
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    description: "Show pipeline state entering review gate"
+  after_review:
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    description: "Show pipeline state after review gate"
+  before_plan:
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    description: "Show pipeline state entering plan"
+  after_plan:
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    description: "Show pipeline state after plan"
+  before_tasks:
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    description: "Show pipeline state entering tasks"
+  after_tasks:
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    description: "Show pipeline state after tasks"
+  before_analyze:
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    description: "Show pipeline state entering analyze"
+  after_analyze:
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    description: "Show pipeline state after analyze"
+  before_implement:
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    description: "Show pipeline state entering implement"
+  after_implement:
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    description: "Show pipeline state after implement"
+  before_verify:
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    description: "Show pipeline state entering verify"
+  after_verify:
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    description: "Show pipeline state after verify"
+  before_scan:
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    description: "Show pipeline state entering scan (brownfield)"
+  after_scan:
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    description: "Show pipeline state after scan (brownfield)"
+  before_generate:
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    description: "Show pipeline state entering generate (brownfield)"
+  after_generate:
+    command: speckit.pipeline.display
+    enabled: false
+    optional: false
+    description: "Show pipeline state after generate (brownfield)"
+
+tags:
+  - "pipeline"
+  - "visualization"
+  - "meta"

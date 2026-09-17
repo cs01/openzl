@@ -1,0 +1,54 @@
+# SpecKit Pipeline Configuration
+#
+# Customize pipeline command behavior per-project. CLI flags override
+# these values for a single invocation. Missing or commented-out knobs
+# use their defaults.
+#
+# Precedence: CLI flags > this file > hardcoded defaults
+#
+# To enable a knob, uncomment the line and set the value.
+
+# Pipeline-state prerequisite chain enforcement: off | advisory (default) | strict.
+# advisory diagnoses an out-of-order stage completion without blocking it;
+# strict declines the write (exit 4) and records a refusal instead. No
+# environment variable or CLI flag can select strict — this key is the only
+# way to enable it.
+pipeline_integrity_enforcement: advisory
+
+implement:
+#   # Allow feedback checkpoints between implementation phases.
+#   # When true, the agent pauses after each phase for review.
+#   # When false (default), phases execute continuously without pausing.
+#   # CLI: --pause-between-phases / --no-pause-between-phases
+  pause_between_phases: false
+
+clarify:
+#   # Scan the project constitution for spec-level obligations the spec leaves
+#   # unaddressed, in addition to the existing taxonomy scan.
+#   # When false, clarify runs taxonomy-only, as it did before this feature.
+#   # CLI: --skip-constitution-scan
+  constitution_scan: true
+
+autopilot:
+#   # Automatically fold pipeline commits into one after tasks completes.
+#   # When true, folds without prompting. When false (default), prompts the user.
+#   # Only applies when running the speckit-autopilot skill.
+#   fold_commits: false
+#
+#   # Model override per pipeline stage. Valid values: opus, sonnet, haiku.
+#   # Omitted stages inherit the parent conversation's model (no override).
+#   # Only applies when running the speckit-autopilot skill.
+  models:
+    specify: opus
+    clarify: opus
+    review: opus
+    plan: sonnet
+    tasks: sonnet
+    implement: sonnet
+    verify: sonnet
+
+# --- Future knob candidates (not yet supported) ---
+#
+# review:
+#   # Model to use for adversarial review agents.
+#   # agent_model: opus

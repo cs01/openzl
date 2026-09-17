@@ -1,0 +1,69 @@
+schema_version: "1.0"
+
+extension:
+  id: pipeline-state
+  name: "Pipeline State Tracking"
+  version: "0.1.0"
+  description: "Record pipeline stage completions to pipeline-state.jsonl"
+  author: rl_devai
+  license: proprietary
+
+requires:
+  speckit_version: ">=0.8.0"
+
+provides:
+  commands:
+    - name: pipeline-state.write
+      file: commands/pipeline-state.write.md
+      description: "Write pipeline stage completion to pipeline-state.jsonl"
+
+hooks:
+  after_specify:
+    command: pipeline-state.write
+    optional: false
+    description: "Record specify completion"
+  after_clarify:
+    command: pipeline-state.write
+    optional: false
+    description: "Record clarify completion"
+  after_review:
+    command: pipeline-state.write
+    optional: false
+    description: "Record review completion"
+  after_plan:
+    command: pipeline-state.write
+    optional: false
+    description: "Record plan completion"
+  after_tasks:
+    command: pipeline-state.write
+    optional: false
+    description: "Record tasks completion"
+  after_analyze:
+    command: pipeline-state.write
+    optional: false
+    # Merge discards this declared value (HookExecutor.register_hooks() hardcodes
+    # enabled: True); wrapper.py::_disable_analyze_state_hook() is the operative
+    # disable mechanism. See docs/architecture/extension-mechanism-gaps.md GAP-11.
+    enabled: false
+    description: "Record analyze completion"
+  after_implement:
+    command: pipeline-state.write
+    optional: false
+    description: "Record implement completion"
+  after_verify:
+    command: pipeline-state.write
+    optional: false
+    description: "Record verify completion"
+  after_scan:
+    command: pipeline-state.write
+    optional: false
+    description: "Record scan completion"
+  after_generate:
+    command: pipeline-state.write
+    optional: false
+    description: "Record generate completion"
+
+tags:
+  - "pipeline"
+  - "state-tracking"
+  - "meta"

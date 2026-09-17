@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "extensions": {
+    "review": {
+      "version": "0.1.0",
+      "source": "local",
+      "manifest_hash": "sha256:6e5250a30ded27c3b0c415901b586489f410d2c59ef4ab9130ec93cce018bf7a",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {},
+      "registered_skills": [],
+      "installed_at": "2026-09-11T21:09:33.015592+00:00"
+    },
+    "pipeline-state": {
+      "version": "0.1.0",
+      "source": "local",
+      "manifest_hash": "sha256:b282463be7a9347dcf37bec663e269e2e334fcfe8498bc6b355e432b71ca723e",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "claude": [
+          "speckit.pipeline-state.write"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-09-11T21:09:33.045297+00:00"
+    },
+    "pipeline": {
+      "version": "0.1.0",
+      "source": "local",
+      "manifest_hash": "sha256:c03ba04ca37bb88dedadb2ad34ba1916981a58ab4f5126dbe3cd6562bf15df64",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "claude": [
+          "speckit.pipeline.display"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-09-11T21:09:33.111975+00:00"
+    },
+    "sdd": {
+      "version": "0.1.0",
+      "source": "local",
+      "manifest_hash": "sha256:79e6b27467f55ae11ba7fa4231b9a75b0a59d4b866c4c5e5694fbe622b9740d3",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "claude": [
+          "speckit.sdd.commit",
+          "speckit.sdd.coevolution"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-09-11T21:09:33.232767+00:00"
+    }
+  }
+}

@@ -1,0 +1,163 @@
+#!/usr/bin/env bash
+# (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
+
+set -euo pipefail
+
+# Usage: speckit-pipeline-diagram <step> <status>
+# Example: speckit-pipeline-diagram plan complete
+
+STEP="${1:-}"
+STATUS="${2:-}"
+
+if [[ -z "$STEP" || -z "$STATUS" ]]; then
+    echo "Usage: speckit-pipeline-diagram <step> <status>" >&2
+    exit 1
+fi
+
+# Determine script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Source common.sh for get_feature_paths (if not already sourced and vars not pre-set)
+if [[ -z "${REPO_ROOT:-}" ]]; then
+    # shellcheck source=.specify/scripts/bash/common.sh
+    source "$SCRIPT_DIR/common.sh"
+    eval "$(get_feature_paths)"
+fi
+
+# Detect pipeline type from step name
+if [[ "$STEP" == "scan" || "$STEP" == "generate" ]]; then
+    PIPELINE="brownfield"
+else
+    PIPELINE="greenfield"
+fi
+
+# Artifact detection
+CONSTITUTION_DONE=false
+SPECIFY_DONE=false
+CLARIFY_DONE=false
+REVIEW_DONE=false
+PLAN_DONE=false
+TASKS_DONE=false
+ANALYZE_DONE=false
+IMPLEMENT_DONE=false
+VERIFY_DONE=false
+SCAN_DONE=false
+GENERATE_DONE=false
+
+# Read pipeline state from JSONL if it exists
+PIPELINE_STATE_FILE="${FEATURE_DIR:-}/pipeline-state.jsonl"
+if [[ -f "$PIPELINE_STATE_FILE" ]]; then
+  # Parse JSONL: for each stage, keep entry with highest seq
+  # Output format: stage:status (e.g., "specify:complete")
+  #
+  # record_type:"refusal" entries (pipeline-integrity-guards feature) are
+  # excluded before grouping — they carry no `.status` field, and without this
+  # filter a refused stage whose only record is the refusal would default to
+  # "complete" via the `// "complete"` fallback below, rendering a declined
+  # write as a finished stage.
+  STAGE_STATUS=$(jq -sr '
+      [.[] | select((.record_type // "") != "refusal")]
+      | group_by(.stage)
+      | map({stage: .[0].stage, entry: (sort_by(.seq) | last)})
+      | .[]
+      | "\(.stage):\(.entry.status // "complete")"
+    ' "$PIPELINE_STATE_FILE" 2>/dev/null || echo "")
+
+  # Check each stage
+  echo "$STAGE_STATUS" | grep -q "^specify:" && SPECIFY_DONE=true
+  echo "$STAGE_STATUS" | grep -q "^clarify:" && CLARIFY_DONE=true
+  echo "$STAGE_STATUS" | grep -q "^review:" && REVIEW_DONE=true
+  echo "$STAGE_STATUS" | grep -q "^plan:" && PLAN_DONE=true
+  echo "$STAGE_STATUS" | grep -q "^tasks:" && TASKS_DONE=true
+  echo "$STAGE_STATUS" | grep -q "^analyze:" && ANALYZE_DONE=true
+  echo "$STAGE_STATUS" | grep -q "^implement:" && IMPLEMENT_DONE=true
+  echo "$STAGE_STATUS" | grep -q "^verify:" && VERIFY_DONE=true
+  echo "$STAGE_STATUS" | grep -q "^scan:" && SCAN_DONE=true
+  echo "$STAGE_STATUS" | grep -q "^generate:" && GENERATE_DONE=true
+fi
+
+# Fallback to file-based detection for stages that don't use pipeline-state.jsonl yet
+if [[ -f "$REPO_ROOT/.specify/memory/constitution.md" ]]; then
+    if grep -q 'speckit:constitution:placeholder' "$REPO_ROOT/.specify/memory/constitution.md" 2>/dev/null; then
+        CONSTITUTION_DONE=false
+    else
+        CONSTITUTION_DONE=true
+    fi
+fi
+[[ "$SPECIFY_DONE" == "false" && -f "${FEATURE_SPEC:-}" ]] && SPECIFY_DONE=true
+[[ "$PLAN_DONE" == "false" && -f "${IMPL_PLAN:-}" ]] && PLAN_DONE=true
+[[ "$TASKS_DONE" == "false" && -f "${TASKS:-}" ]] && TASKS_DONE=true
+[[ "$VERIFY_DONE" == "false" && -f "${VERIFICATION:-}" ]] && VERIFY_DONE=true
+[[ "$SCAN_DONE" == "false" && -f "$REPO_ROOT/.specify/memory/project-profile.md" ]] && SCAN_DONE=true
+
+# Generate is same as specify (disambiguated by pipeline type)
+if [[ "$PIPELINE" == "brownfield" && "$SPECIFY_DONE" == "true" ]]; then
+    GENERATE_DONE=true
+fi
+
+# Implement detection: all top-level checkboxes in tasks.md are checked
+if [[ -f "${TASKS:-}" ]]; then
+    unchecked=$(grep -c '^- \[ \]' "$TASKS" 2>/dev/null || true)
+    unchecked=${unchecked:-0}
+    if [[ "$unchecked" -eq 0 ]]; then
+        IMPLEMENT_DONE=true
+    fi
+fi
+
+# Context extraction
+RISK="unknown"
+REVIEW_GATE_STATUS="none"
+REVIEW_GATE_TYPE="none"
+PHASE_COUNT=0
+
+if [[ -f "${FEATURE_SPEC:-}" ]]; then
+    RISK=$(awk 'NR>=2 && NR<=10 && /^risk:/ {print $2; exit}' "$FEATURE_SPEC" || echo "unknown")
+fi
+
+# Extract review gate context from pipeline state
+if [[ -f "$PIPELINE_STATE_FILE" ]]; then
+    # Get latest review entry. Excludes record_type:"refusal" entries for the
+    # same reason STAGE_STATUS above does: a refusal carries no .status/.gate_type,
+    # and without this filter the most recent record being a refusal would
+    # silently resolve both fields to "none" instead of surfacing the refusal.
+    REVIEW_ENTRY=$(jq -sr '.[] | select(.stage == "review") | select((.record_type // "") != "refusal") | select(.seq != null) | {seq: .seq, status: .status, gate_type: .gate_type}' "$PIPELINE_STATE_FILE" | jq -s 'sort_by(.seq) | last' 2>/dev/null || echo "{}")
+    REVIEW_GATE_STATUS=$(echo "$REVIEW_ENTRY" | jq -r '.status // "none"' 2>/dev/null || echo "none")
+    REVIEW_GATE_TYPE=$(echo "$REVIEW_ENTRY" | jq -r '.gate_type // "none"' 2>/dev/null || echo "none")
+fi
+
+if [[ -f "${IMPL_PLAN:-}" ]]; then
+    PHASE_COUNT=$(grep -cE '^#{2,3} Phase' "$IMPL_PLAN" 2>/dev/null || true)
+    PHASE_COUNT=${PHASE_COUNT:-0}
+fi
+
+# Build JSON state
+JSON=$(cat <<EOF
+{
+  "current_step": "$STEP",
+  "status": "$STATUS",
+  "pipeline": "$PIPELINE",
+  "artifacts": {
+    "constitution": $CONSTITUTION_DONE,
+    "specify": $SPECIFY_DONE,
+    "clarify": $CLARIFY_DONE,
+    "review": $REVIEW_DONE,
+    "plan": $PLAN_DONE,
+    "tasks": $TASKS_DONE,
+    "analyze": $ANALYZE_DONE,
+    "implement": $IMPLEMENT_DONE,
+    "verify": $VERIFY_DONE,
+    "scan": $SCAN_DONE,
+    "generate": $GENERATE_DONE
+  },
+  "context": {
+    "risk": "$RISK",
+    "review_gate_status": "$REVIEW_GATE_STATUS",
+    "review_gate_type": "$REVIEW_GATE_TYPE",
+    "phase_count": $PHASE_COUNT
+  }
+}
+EOF
+)
+
+# Pipe to Python renderer
+echo "$JSON" | python3 "$SCRIPT_DIR/pipeline_diagram.py"

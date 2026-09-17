@@ -1,0 +1,61 @@
+schema_version: "1.0"
+workflow:
+  id: "sdd-generate-verify"
+  name: "Meta SDD Spec Generation & Verification"
+  version: "1.0.0"
+  author: "rl_devai"
+  description: "Meta-specific brownfield pipeline: generate specs from existing code, review, verify with multi-agent SDD verification, and commit via Sapling"
+  integration: claude
+  model: "claude-sonnet-4-20250514"
+  tags:
+    - "meta"
+    - "sdd"
+    - "generate"
+    - "verify"
+    - "sapling"
+
+requires:
+  speckit_version: ">=0.8.0"
+  integrations:
+    any: ["claude"]
+
+inputs:
+  target_path:
+    type: string
+    required: true
+    prompt: "Path to the codebase to generate specs for"
+  mode:
+    type: string
+    required: false
+    default: "one-shot"
+    enum: [interactive, one-shot]
+    prompt: "Generation mode: interactive (review each spec) or one-shot (generate all at once)"
+
+steps:
+  - id: generate
+    type: command
+    command: speckit.generate
+    input:
+      args: "{{ inputs.target_path }} --mode {{ inputs.mode }}"
+
+  - id: review-generated
+    type: gate
+    message: "Review the generated specs. Are they ready for verification?"
+    options: [accept, reject, refine]
+    on_reject: abort
+
+  - id: verify
+    type: command
+    command: speckit.verify
+    input:
+      args: "{{ inputs.target_path }}"
+
+  - id: accept-verification
+    type: gate
+    message: "Review verification results. Accept the specs, reject them, or refine and re-verify?"
+    options: [accept, reject, refine]
+    on_reject: retry
+
+  - id: commit
+    type: command
+    command: speckit.sdd.commit

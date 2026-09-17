@@ -1,0 +1,26 @@
+schema_version: "1.0"
+
+extension:
+  id: review
+  name: "Post-Plan Review Trigger"
+  version: "0.1.0"
+  description: "Trigger plan review after plan generation"
+  author: rl_devai
+  license: proprietary
+
+requires:
+  speckit_version: ">=0.8.0"
+
+provides:
+  commands: []
+
+hooks:
+  after_plan:
+    command: speckit.review-plan
+    enabled: true
+    optional: false
+    description: "Post-plan constitution compliance, correctness, coverage, and risk review (Plan Review)"
+
+tags:
+  - "review"
+  - "meta"

@@ -1,0 +1,80 @@
+schema_version: "1.0"
+
+extension:
+  id: sdd
+  name: "SDD at Meta"
+  version: "0.1.0"
+  description: "Spec generation, multi-agent verification, and Sapling SCM integration for SDD at Meta"
+  author: rl_devai
+  license: proprietary
+
+requires:
+  speckit_version: ">=0.8.0"
+  tools:
+    - name: sl
+      required: true
+
+provides:
+  commands:
+    - name: speckit.sdd.commit
+      file: commands/speckit.sdd.commit.md
+      description: "Sapling auto-commit for spec artifacts"
+    - name: speckit.sdd.coevolution
+      file: commands/speckit.sdd.coevolution.md
+      description: "SpecKit SDD pipeline: check co-evolution compliance between code changes and `specs/<feature>/spec.md`."
+
+# Auto-commit hooks default to `optional: true` (prompted): after each phase
+# the agent surfaces the spec-artifact commit and waits for the user to run it,
+# rather than committing to the team's SCM unattended. Teams that want silent
+# auto-commit can set `optional: false` on individual phases in their installed
+# .specify/extensions.yml.
+hooks:
+  after_specify:
+    command: speckit.sdd.commit
+    optional: true
+    description: "Commit new specification"
+  after_plan:
+    command: speckit.sdd.commit
+    optional: true
+    description: "Commit implementation plan"
+  after_tasks:
+    command: speckit.sdd.commit
+    optional: true
+    description: "Commit task breakdown"
+  after_constitution:
+    command: speckit.sdd.commit
+    optional: true
+    description: "Commit constitution update"
+  after_clarify:
+    command: speckit.sdd.commit
+    optional: true
+    description: "Commit spec clarifications"
+  after_review:
+    command: speckit.sdd.commit
+    optional: true
+    description: "Commit review artifacts"
+  after_checklist:
+    command: speckit.sdd.commit
+    optional: true
+    description: "Commit checklist"
+  after_generate:
+    command: speckit.sdd.commit
+    optional: true
+    description: "Commit generated specification"
+  after_scan:
+    command: speckit.sdd.commit
+    optional: true
+    description: "Commit project profile"
+  after_setup:
+    command: speckit.sdd.commit
+    optional: false
+    description: "Commit setup artifacts"
+  after_verify:
+    command: speckit.sdd.commit
+    optional: true
+    description: "Commit verification report"
+
+tags:
+  - "sdd"
+  - "meta"
+  - "sapling"
