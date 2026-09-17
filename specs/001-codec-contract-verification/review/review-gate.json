@@ -1,0 +1,18 @@
+{
+  "status": "blocked",
+  "gate_type": "secondary",
+  "must_address_count": 9,
+  "should_consider_count": 16,
+  "minor_count": 1,
+  "total_findings": 26,
+  "agents_completed": 3,
+  "timestamp": "2026-09-11T21:50:55Z",
+  "primary_completed_at": null,
+  "attempt_id": "secondary-20260911T212711Z-1312",
+  "partial": false,
+  "override": false,
+  "resolved": false,
+  "auto_applied": true,
+  "panel_size": 3,
+  "quorum_met": true
+}
