@@ -1,0 +1,15 @@
+# Sourced by run.sh. Disproving harnesses run without unwinding assertions.
+ESBMC_UNWIND=13
+ESBMC_CHECKS=(--overflow-check --ub-shift-check --force-malloc-success)
+DISPROVE="--overflow-check --ub-shift-check --force-malloc-success --no-unwinding-assertions"
+
+ESBMC_HARNESS_UNWIND[dispatchN_byTag_segment_wrap_harness]=17
+ESBMC_HARNESS_CHECKS[dispatchN_byTag_segment_wrap_harness]="${DISPROVE}"
+ESBMC_EXPECT[dispatchN_byTag_segment_wrap_harness]=COUNTEREXAMPLE
+
+ESBMC_HARNESS_UNWIND[dispatchN_byTag_segment_bounded_harness]=17
+
+ESBMC_HARNESS_CHECKS[partition_bucket_range_harness]="${DISPROVE}"
+ESBMC_EXPECT[partition_bucket_range_harness]=COUNTEREXAMPLE
+
+ESBMC_HARNESS_CHECKS[tokenize_vsf_wildcopy_harness]="--overflow-check --ub-shift-check --force-malloc-success --boolector"
